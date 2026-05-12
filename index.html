@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphics Tracker Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1420;
+    --surface2: #111b2e;
+    --surface3: #162035;
+    --border: rgba(99,179,255,0.12);
+    --border-glow: rgba(99,179,255,0.35);
+    --accent: #3b9eff;
+    --accent2: #00e5ff;
+    --accent3: #7c3aed;
+    --gold: #ffd600;
+    --green: #00e676;
+    --red: #ff4d6d;
+    --text: #e8f4ff;
+    --text2: #8ba7c7;
+    --text3: #4a6b8a;
+    --card-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    --glow: 0 0 20px rgba(59,158,255,0.3);
+    --glow-strong: 0 0 40px rgba(59,158,255,0.5);
+    --rate: 66;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(59,158,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 30% at 60% 30%, rgba(0,229,255,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grid overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,158,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,158,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: var(--glow);
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%, 100% { box-shadow: 0 0 20px rgba(59,158,255,0.3); }
+    50% { box-shadow: 0 0 40px rgba(59,158,255,0.6), 0 0 80px rgba(59,158,255,0.2); }
+  }
+
+  .logo-text h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--text), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text p { font-size: 11px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.5s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .live-label { font-size: 11px; color: var(--green); letter-spacing: 2px; }
+
+  /* ===== DASHBOARD STATS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .stat-card:hover { border-color: var(--border-glow); transform: translateY(-2px); box-shadow: var(--glow); }
+  .stat-card:hover::before { opacity: 1; }
+
+  .stat-card.gold::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .stat-card.green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+  .stat-card.purple::before { background: linear-gradient(90deg, transparent, var(--accent3), transparent); }
+
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+
+  .stat-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    transition: all 0.4s ease;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.purple { color: var(--accent3); }
+
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  .stat-icon {
+    position: absolute;
+    right: 16px; top: 16px;
+    font-size: 28px;
+    opacity: 0.15;
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ===== PANEL ===== */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+
+  .panel-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title span { font-size: 16px; }
+
+  .panel-body { padding: 20px; }
+
+  /* ===== ADD CLIENT FORM ===== */
+  .add-form {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap label {
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.25s;
+  }
+
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,158,255,0.1), var(--glow);
+    background: var(--surface);
+  }
+
+  input::placeholder { color: var(--text3); }
+
+  .btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #1a78d4);
+    color: white;
+    box-shadow: 0 4px 16px rgba(59,158,255,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(59,158,255,0.5);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-danger {
+    background: rgba(255,77,109,0.15);
+    color: var(--red);
+    border: 1px solid rgba(255,77,109,0.3);
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .btn-danger:hover { background: rgba(255,77,109,0.25); border-color: var(--red); }
+
+  .btn-save {
+    background: linear-gradient(135deg, var(--green), #00b248);
+    color: #001a0a;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(0,230,118,0.3);
+  }
+
+  .btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(0,230,118,0.5);
+  }
+
+  .btn-save:active { transform: translateY(0); }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #ff8f00);
+    color: #1a0a00;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(255,214,0,0.3);
+  }
+
+  /* ===== CLIENT TABLE ===== */
+  .table-wrap { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    text-align: left;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    font-weight: 500;
+  }
+
+  th:last-child { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(99,179,255,0.05);
+    transition: all 0.2s;
+    animation: rowFadeIn 0.4s ease forwards;
+  }
+
+  @keyframes rowFadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  tbody tr:hover { background: rgba(59,158,255,0.04); }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 14px 14px;
+    font-size: 13px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  td:last-child { text-align: right; }
+
+  .client-name {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .client-avatar {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent3), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .graphics-input {
+    width: 80px;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .rate-tag {
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--surface3);
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .row-total {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(255,214,0,0.3);
+  }
+
+  .actions-td { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text3);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+  .empty-state p { font-size: 13px; }
+
+  /* ===== FOOTER BAR ===== */
+  .footer-bar {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .total-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .total-label { font-size: 11px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; }
+
+  .grand-total {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(255,214,0,0.4);
+    transition: all 0.4s ease;
+  }
+
+  .total-graphics {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* ===== RIGHT PANEL ===== */
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ===== SAVE SECTION ===== */
+  .save-panel .panel-body { display: flex; flex-direction: column; gap: 12px; }
+
+  .save-btn-big {
+    width: 100%;
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .save-status {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    padding: 8px;
+    background: var(--surface3);
+    border-radius: 8px;
+    transition: all 0.3s;
+  }
+
+  .save-status.saved { color: var(--green); }
+
+  /* ===== HISTORY ===== */
+  .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+
+  .history-list::-webkit-scrollbar { width: 4px; }
+  .history-list::-webkit-scrollbar-track { background: transparent; }
+  .history-list::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 4px; }
+
+  .history-item {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+    animation: rowFadeIn 0.3s ease forwards;
+  }
+
+  .history-item:hover { border-color: var(--border-glow); background: var(--surface2); }
+
+  .history-info { flex: 1; min-width: 0; }
+
+  .history-date { font-size: 10px; color: var(--text3); letter-spacing: 1px; margin-bottom: 2px; }
+
+  .history-summary {
+    font-size: 12px;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-total {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .restore-btn {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(59,158,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(59,158,255,0.2);
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .restore-btn:hover { background: rgba(59,158,255,0.25); }
+
+  .history-empty { text-align: center; color: var(--text3); font-size: 12px; padding: 30px 0; }
+
+  /* ===== QUICK STATS ===== */
+  .mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .mini-stat {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .mini-stat-label { font-size: 9px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+
+  .mini-stat-value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border-glow);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    box-shadow: var(--card-shadow), var(--glow);
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 320px;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success .toast-icon { color: var(--green); }
+  .toast.error .toast-icon { color: var(--red); }
+  .toast-icon { font-size: 18px; }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-wrap { margin-top: 8px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-bottom: 5px; }
+  .progress-bar { height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px rgba(59,158,255,0.5);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes countUp {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .num-update { animation: countUp 0.3s ease forwards; }
+
+  /* Scan line effect */
+  .panel::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59,158,255,0.3), transparent);
+    animation: scan 6s linear infinite;
+    pointer-events: none;
+  }
+
+  .panel { position: relative; }
+
+  @keyframes scan {
+    0% { top: -2px; }
+    100% { top: 100%; }
+  }
+
+  /* ===== CLEAR BTN ===== */
+  .btn-clear {
+    background: rgba(255,77,109,0.08);
+    color: var(--red);
+    border: 1px solid rgba(255,77,109,0.2);
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .btn-clear:hover { background: rgba(255,77,109,0.2); }
+
+  /* Rate display */
+  .rate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,214,0,0.08);
+    border: 1px solid rgba(255,214,0,0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--gold);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .app { padding: 12px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .add-form { grid-template-columns: 1fr; }
+    .stat-value { font-size: 24px; }
+  }
+
+  .tag-count {
+    background: rgba(59,158,255,0.15);
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  /* Number shimmer on update */
+  @keyframes shimmer {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; color: var(--accent2); }
+    100% { opacity: 1; }
+  }
+  .shimmer { animation: shimmer 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="9" height="9" rx="2.5" fill="white" opacity="0.95"/>
+          <rect x="13" y="2" width="9" height="9" rx="2.5" fill="white" opacity="0.7"/>
+          <rect x="2" y="13" width="9" height="9" rx="2.5" fill="white" opacity="0.7"/>
+          <rect x="13" y="13" width="9" height="9" rx="2.5" fill="white" opacity="0.5"/>
+          <circle cx="6.5" cy="6.5" r="1.5" fill="#3b9eff"/>
+          <circle cx="17.5" cy="6.5" r="1.5" fill="#00e5ff"/>
+          <circle cx="6.5" cy="17.5" r="1.5" fill="#00e5ff"/>
+          <circle cx="17.5" cy="17.5" r="1.5" fill="#7c3aed"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1>GRAPHICS TRACKER</h1>
+        <p>Earnings Dashboard • ₱66/graphic</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="live-dot"></div>
+      <span class="live-label">LIVE</span>
+    </div>
+  </header>
+
+  <!-- STATS CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-label">Total Clients</div>
+      <div class="stat-value accent" id="stat-clients">0</div>
+      <div class="stat-sub">active accounts</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">🎨</div>
+      <div class="stat-label">Total Graphics</div>
+      <div class="stat-value green" id="stat-graphics">0</div>
+      <div class="stat-sub">combined output</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">💰</div>
+      <div class="stat-label">Total Earnings</div>
+      <div class="stat-value gold" id="stat-earnings">₱0</div>
+      <div class="stat-sub">at ₱66/graphic</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-label">Top Client</div>
+      <div class="stat-value" id="stat-top" style="font-size:16px; padding-top:6px;">—</div>
+      <div class="stat-sub" id="stat-top-val">no data yet</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+    <!-- LEFT: CLIENT TABLE -->
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" fill="var(--accent)" opacity="0.8"/><rect x="13" y="2" width="9" height="9" rx="2" fill="var(--accent2)" opacity="0.8"/><rect x="2" y="13" width="9" height="9" rx="2" fill="var(--accent2)" opacity="0.6"/><rect x="13" y="13" width="9" height="9" rx="2" fill="var(--accent3)" opacity="0.6"/></svg>
+            CLIENT ROSTER <span class="tag-count" id="count-tag">0</span></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="rate-badge">₱<span id="rate-disp">66</span>/graphic</div>
+            <button class="btn btn-clear" onclick="clearAll()">✕ Clear All</button>
+          </div>
+        </div>
+
+        <!-- ADD FORM -->
+        <div style="padding:20px 20px 0;">
+          <div class="add-form">
+            <div class="input-wrap">
+              <label>Client Name</label>
+              <input type="text" id="inp-name" placeholder="e.g. Juan dela Cruz" onkeydown="handleKey(event)">
+            </div>
+            <div class="input-wrap">
+              <label>Graphics Count</label>
+              <input type="number" id="inp-graphics" placeholder="0" min="0" onkeydown="handleKey(event)" style="width:130px;">
+            </div>
+            <div class="input-wrap" style="display:flex;align-items:flex-end;">
+              <button class="btn btn-primary" onclick="addClient()" style="height:44px;">+ Add Client</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="panel-body" style="padding-top:10px;">
+          <div class="table-wrap">
+            <table id="client-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Client</th>
+                  <th style="text-align:center;">Graphics</th>
+                  <th style="text-align:center;">Rate</th>
+                  <th style="text-align:right;">Total</th>
+                  <th style="text-align:right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="client-body">
+                <tr id="empty-row">
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <div class="icon">🎨</div>
+                      <p>Walang client pa. Mag-add na!</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FOOTER TOTAL -->
+        <div class="footer-bar">
+          <div class="total-section">
+            <div>
+              <div class="total-label">Total Graphics</div>
+              <div class="total-graphics" id="footer-graphics">0</div>
+            </div>
+            <div style="width:1px;height:40px;background:var(--border);"></div>
+            <div>
+              <div class="total-label">Grand Total Earnings</div>
+              <div class="grand-total" id="footer-total">₱0.00</div>
+            </div>
+          </div>
+          <button class="btn btn-save save-btn-big" onclick="saveData()" style="padding:12px 24px;">💾 Save Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      <!-- AUTO SAVE STATUS -->
+      <div class="panel save-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>💾</span> Auto Save</div>
+        </div>
+        <div class="panel-body">
+          <button class="btn btn-save save-btn-big" onclick="saveData()">💾 Save Data</button>
+          <div class="save-status" id="save-status">Last save: never</div>
+          <div style="font-size:11px;color:var(--text3);text-align:center;">Auto-saves every 30 seconds</div>
+        </div>
+      </div>
+
+      <!-- QUICK BREAKDOWN -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>📊</span> Quick Stats</div>
+        </div>
+        <div class="panel-body">
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">Avg/Client</div>
+              <div class="mini-stat-value" id="qs-avg">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">Avg Earning</div>
+              <div class="mini-stat-value" id="qs-avg-earn" style="color:var(--gold);">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">Max Graphics</div>
+              <div class="mini-stat-value" id="qs-max" style="color:var(--green);">—</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">Sessions Saved</div>
+              <div class="mini-stat-value" id="qs-sessions" style="color:var(--accent3);">0</div>
+            </div>
+          </div>
+          <div class="progress-wrap" style="margin-top:14px;">
+            <div class="progress-label">
+              <span>Earnings Progress</span>
+              <span id="prog-pct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;">Goal: ₱10,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>🕐</span> Save History</div>
+          <button class="btn btn-clear" style="font-size:11px;padding:5px 10px;" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="panel-body" style="padding:14px;">
+          <div class="history-list" id="history-list">
+            <div class="history-empty">No history yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span id="toast-msg">Saved!</span>
+</div>
+
+<script>
+  const RATE = 66;
+  const GOAL = 10000;
+  let clients = [];
+  let nextId = 1;
+  let autoSaveTimer;
+
+  // ===== INIT =====
+  window.addEventListener('load', () => {
+    loadData();
+    startAutoSave();
+  });
+
+  function startAutoSave() {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = setInterval(() => {
+      if (clients.length > 0) saveData(true);
+    }, 30000);
+  }
+
+  // ===== ADD CLIENT =====
+  function addClient() {
+    const name = document.getElementById('inp-name').value.trim();
+    const gfx = parseInt(document.getElementById('inp-graphics').value) || 0;
+
+    if (!name) { showToast('Ilagay ang pangalan ng client!', 'error'); return; }
+    if (gfx < 0) { showToast('Di pwede negative ang graphics!', 'error'); return; }
+
+    clients.push({ id: nextId++, name, graphics: gfx });
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-graphics').value = '';
+    document.getElementById('inp-name').focus();
+
+    renderTable();
+    updateStats();
+    showToast(`✓ "${name}" na-add na!`, 'success');
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter') addClient();
+  }
+
+  // ===== REMOVE CLIENT =====
+  function removeClient(id) {
+    clients = clients.filter(c => c.id !== id);
+    renderTable();
+    updateStats();
+  }
+
+  // ===== UPDATE GRAPHICS =====
+  function updateGraphics(id, val) {
+    const client = clients.find(c => c.id === id);
+    if (client) {
+      client.graphics = Math.max(0, parseInt(val) || 0);
+      updateRowTotal(id);
+      updateStats();
+    }
+  }
+
+  function updateRowTotal(id) {
+    const client = clients.find(c => c.id === id);
+    if (!client) return;
+    const total = client.graphics * RATE;
+    const el = document.getElementById(`total-${id}`);
+    if (el) {
+      el.textContent = `₱${total.toLocaleString('en-PH', {minimumFractionDigits:2})}`;
+      el.classList.remove('shimmer');
+      void el.offsetWidth;
+      el.classList.add('shimmer');
+    }
+  }
+
+  // ===== CLEAR ALL =====
+  function clearAll() {
+    if (clients.length === 0) return;
+    if (!confirm('Clear lahat ng clients? Hindi ito ma-undo (maliban kung may save ka).')) return;
+    clients = [];
+    renderTable();
+    updateStats();
+    showToast('Cleared lahat ng clients.', 'error');
+  }
+
+  // ===== RENDER TABLE =====
+  function renderTable() {
+    const tbody = document.getElementById('client-body');
+    document.getElementById('count-tag').textContent = clients.length;
+
+    if (clients.length === 0) {
+      tbody.innerHTML = `<tr id="empty-row"><td colspan="6"><div class="empty-state"><div class="icon">🎨</div><p>Walang client pa. Mag-add na!</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = clients.map((c, i) => {
+      const total = c.graphics * RATE;
+      const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      return `
+        <tr>
+          <td style="color:var(--text3);font-size:12px;">${i+1}</td>
+          <td>
+            <div class="client-name">
+              <div class="client-avatar" style="background:${avatarColor(i)}">${initials}</div>
+              ${escapeHtml(c.name)}
+            </div>
+          </td>
+          <td style="text-align:center;">
+            <input type="number" class="graphics-input" value="${c.graphics}" min="0"
+              oninput="updateGraphics(${c.id}, this.value)"
+              onchange="updateGraphics(${c.id}, this.value)"
+              style="width:80px;text-align:center;">
+          </td>
+          <td style="text-align:center;">
+            <div class="rate-tag">× ₱${RATE}</div>
+          </td>
+          <td><div class="row-total" id="total-${c.id}">₱${total.toLocaleString('en-PH',{minimumFractionDigits:2})}</div></td>
+          <td>
+            <div class="actions-td">
+              <button class="btn btn-danger" onclick="removeClient(${c.id})">✕</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function avatarColor(i) {
+    const colors = [
+      'linear-gradient(135deg,#3b9eff,#1a78d4)',
+      'linear-gradient(135deg,#7c3aed,#5b21b6)',
+      'linear-gradient(135deg,#00e5ff,#0097a7)',
+      'linear-gradient(135deg,#ff6b35,#e53935)',
+      'linear-gradient(135deg,#00e676,#00897b)',
+      'linear-gradient(135deg,#ffd600,#ff8f00)',
+    ];
+    return colors[i % colors.length];
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ===== UPDATE STATS =====
+  function updateStats() {
+    const totalGraphics = clients.reduce((s,c) => s + c.graphics, 0);
+    const totalEarnings = totalGraphics * RATE;
+    const count = clients.length;
+
+    // Stat cards
+    animNum('stat-clients', count);
+    animNum('stat-graphics', totalGraphics);
+    document.getElementById('stat-earnings').textContent = `₱${totalEarnings.toLocaleString('en-PH',{minimumFractionDigits:2})}`;
+
+    // Top client
+    if (count > 0) {
+      const top = clients.reduce((a,b) => a.graphics > b.graphics ? a : b);
+      document.getElementById('stat-top').textContent = top.name.split(' ')[0];
+      document.getElementById('stat-top-val').textContent = `${top.graphics} graphics • ₱${(top.graphics*RATE).toLocaleString('en-PH')}`;
+    } else {
+      document.getElementById('stat-top').textContent = '—';
+      document.getElementById('stat-top-val').textContent = 'no data yet';
+    }
+
+    // Footer
+    document.getElementById('footer-graphics').textContent = totalGraphics;
+    document.getElementById('footer-total').textContent = `₱${totalEarnings.toLocaleString('en-PH',{minimumFractionDigits:2})}`;
+
+    // Quick stats
+    if (count > 0) {
+      const avg = (totalGraphics / count).toFixed(1);
+      const avgEarn = ((totalEarnings) / count).toFixed(2);
+      const max = Math.max(...clients.map(c=>c.graphics));
+      document.getElementById('qs-avg').textContent = avg;
+      document.getElementById('qs-avg-earn').textContent = `₱${parseFloat(avgEarn).toLocaleString('en-PH')}`;
+      document.getElementById('qs-max').textContent = max;
+    } else {
+      document.getElementById('qs-avg').textContent = '—';
+      document.getElementById('qs-avg-earn').textContent = '—';
+      document.getElementById('qs-max').textContent = '—';
+    }
+
+    // Progress
+    const pct = Math.min(100, (totalEarnings / GOAL) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct.toFixed(1) + '%';
+  }
+
+  function animNum(id, val) {
+    const el = document.getElementById(id);
+    el.textContent = val;
+    el.classList.remove('num-update');
+    void el.offsetWidth;
+    el.classList.add('num-update');
+  }
+
+  // ===== SAVE / LOAD =====
+  function saveData(auto = false) {
+    const snapshot = {
+      timestamp: new Date().toISOString(),
+      clients: JSON.parse(JSON.stringify(clients)),
+      nextId,
+      totalGraphics: clients.reduce((s,c)=>s+c.graphics,0),
+      totalEarnings: clients.reduce((s,c)=>s+c.graphics,0) * RATE
+    };
+
+    // Save current state
+    localStorage.setItem('gfx_tracker_state', JSON.stringify({ clients, nextId }));
+
+    // Save to history
+    let history = JSON.parse(localStorage.getItem('gfx_tracker_history') || '[]');
+    history.unshift(snapshot);
+    if (history.length > 20) history = history.slice(0,20);
+    localStorage.setItem('gfx_tracker_history', JSON.stringify(history));
+
+    // Sessions count
+    const sessions = parseInt(localStorage.getItem('gfx_sessions') || '0') + 1;
+    localStorage.setItem('gfx_sessions', sessions);
+    document.getElementById('qs-sessions').textContent = sessions;
+
+    // UI feedback
+    const now = new Date().toLocaleString('en-PH');
+    const status = document.getElementById('save-status');
+    status.textContent = `Last save: ${now}`;
+    status.className = 'save-status saved';
+
+    renderHistory();
+    if (!auto) showToast('💾 Data saved successfully!', 'success');
+  }
+
+  function loadData() {
+    const raw = localStorage.getItem('gfx_tracker_state');
+    if (raw) {
+      try {
+        const state = JSON.parse(raw);
+        clients = state.clients || [];
+        nextId = state.nextId || 1;
+      } catch(e) { clients = []; }
+    }
+
+    const sessions = parseInt(localStorage.getItem('gfx_sessions') || '0');
+    document.getElementById('qs-sessions').textContent = sessions;
+
+    renderTable();
+    updateStats();
+    renderHistory();
+  }
+
+  function restoreSnapshot(idx) {
+    const history = JSON.parse(localStorage.getItem('gfx_tracker_history') || '[]');
+    if (!history[idx]) return;
+    if (!confirm(`Restore save from ${formatDate(history[idx].timestamp)}?`)) return;
+    clients = JSON.parse(JSON.stringify(history[idx].clients));
+    nextId = history[idx].nextId || clients.length + 1;
+    renderTable();
+    updateStats();
+    showToast('✓ Snapshot restored!', 'success');
+  }
+
+  function clearHistory() {
+    if (!confirm('Clear all save history?')) return;
+    localStorage.removeItem('gfx_tracker_history');
+    renderHistory();
+    showToast('History cleared.', 'error');
+  }
+
+  function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('gfx_tracker_history') || '[]');
+    const el = document.getElementById('history-list');
+
+    if (history.length === 0) {
+      el.innerHTML = '<div class="history-empty">No history yet</div>';
+      return;
+    }
+
+    el.innerHTML = history.map((h,i) => `
+      <div class="history-item">
+        <div class="history-info">
+          <div class="history-date">${formatDate(h.timestamp)}</div>
+          <div class="history-summary">${h.clients.length} client${h.clients.length!==1?'s':''} • ${h.totalGraphics} graphics</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="history-total">₱${(h.totalEarnings||0).toLocaleString('en-PH')}</div>
+          <button class="restore-btn" onclick="restoreSnapshot(${i})">↩ Load</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-PH', {month:'short',day:'numeric'}) + ' ' +
+           d.toLocaleTimeString('en-PH', {hour:'2-digit',minute:'2-digit'});
+  }
+
+  // ===== TOAST =====
+  let toastTimer;
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    document.getElementById('toast-msg').textContent = msg;
+    icon.textContent = type === 'success' ? '✓' : '⚠';
+    t.className = `toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = `toast ${type}`; }, 3000);
+  }
+</script>
+</body>
+</html>
